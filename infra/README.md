@@ -12,7 +12,11 @@ The deploy command automatically loads `../.env.local` for `DATABASE_ID`,
 `TABLE_ID`, and `POLL_INTERVAL_MS`. Existing process variables take precedence,
 so the Jupyter pod's `APP_NAME`, `DOMAIN_SUFFIX`, and Appwrite connection values
 remain authoritative. It publishes all five application values as Appwrite
-project variables before deploying the Function and Site.
+resource variables before deploying the Function and Site. The installer
+writes `DATABASE_ID` and `TABLE_ID` to the Function and writes
+`APP_NAME`, `APPWRITE_PROJECT_ID`, `DOMAIN_SUFFIX`, and `POLL_INTERVAL_MS` to
+the Site before creating their deployments. It intentionally does not create
+same-named Appwrite project-global variables because that causes conflicts.
 
 The installer uses the locally installed Appwrite CLI and is rerunnable. It
 delegates resources to separate modules:

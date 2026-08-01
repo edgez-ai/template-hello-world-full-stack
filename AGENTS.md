@@ -88,11 +88,14 @@ npm run deploy
 ```
 
 The deploy entrypoint loads the root `.env.local`, combines it with injected
-workspace variables, configures the local CLI, and installs all five global
-values as Appwrite project variables before creating deployments. It then
-idempotently creates or updates the database, messages table, public Function,
-React web Site, deployments, and both conventional proxy rules. DNS must point
-both domains at the targets Appwrite reports.
+workspace variables, and configures the local CLI. It sets `DATABASE_ID` and
+`TABLE_ID` directly on the Function and the four public build values directly
+on the Site before creating deployments. Do not duplicate these as Appwrite
+project-global variables: Appwrite warns about the naming conflict and resource
+builds do not inherit project globals. The installer then idempotently creates
+or updates the database, messages table, public Function, React web Site,
+deployments, and both conventional proxy rules. DNS must point both domains at
+the targets Appwrite reports.
 
 The installer changes remote state. Do not run it merely to test local code;
 run `npm run check` for local validation. Only run remote installation when the

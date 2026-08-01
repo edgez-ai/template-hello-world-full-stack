@@ -95,6 +95,46 @@ export function ensure(label, probeArgs, createArgs) {
   console.log(`Created ${label}`);
 }
 
+export function ensureResourceVariable(group, resourceFlag, resourceId, key, value) {
+  if (dryRun) {
+    run([
+      group, "create-variable",
+      resourceFlag, resourceId,
+      "--key", key,
+      "--value", value,
+      "--secret", "false",
+    ]);
+    return;
+  }
+
+  const result = run(
+    [group, "list-variables", resourceFlag, resourceId, "--json"],
+    { capture: true },
+  );
+  const variables = JSON.parse(result.stdout).variables || [];
+  const current = variables.find((variable) => variable.key === key);
+  if (current) {
+    run([
+      group, "update-variable",
+      resourceFlag, resourceId,
+      "--variable-id", current.$id,
+      "--key", key,
+      "--value", value,
+      "--secret", "false",
+    ]);
+    console.log(`Updated ${group} variable ${key}`);
+    return;
+  }
+  run([
+    group, "create-variable",
+    resourceFlag, resourceId,
+    "--key", key,
+    "--value", value,
+    "--secret", "false",
+  ]);
+  console.log(`Created ${group} variable ${key}`);
+}
+
 export function ensureProxyDomain(type, resourceId, domain) {
   const domainExists = !dryRun && run(
     ["proxy", "list-rules", "--where", `domain=${domain}`, "--limit", "1", "--json"],
@@ -119,24 +159,4 @@ export function configureClient() {
     "--project-id", config.projectId,
     "--key", config.apiKey,
   ]);
-}
-
-export function installProjectVariables() {
-  const variables = [
-    ["app-name", "APP_NAME", config.name],
-    ["domain-suffix", "DOMAIN_SUFFIX", config.domainSuffix],
-    ["poll-interval", "POLL_INTERVAL_MS", config.pollIntervalMs],
-    ["database-id", "DATABASE_ID", config.databaseId],
-    ["table-id", "TABLE_ID", config.tableId],
-  ];
-
-  for (const [variableId, key, value] of variables) {
-    if (exists(["project", "get-variable", "--variable-id", variableId])) {
-      run(["project", "update-variable", "--variable-id", variableId, "--key", key, "--value", value]);
-      console.log(`Updated project variable ${key}`);
-    } else {
-      run(["project", "create-variable", "--variable-id", variableId, "--key", key, "--value", value]);
-      console.log(`Created project variable ${key}`);
-    }
-  }
 }

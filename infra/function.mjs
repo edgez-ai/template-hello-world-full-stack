@@ -2,6 +2,7 @@ import {
   config,
   domainPrefix,
   ensureProxyDomain,
+  ensureResourceVariable,
   exists,
   infraDir,
   run,
@@ -29,6 +30,13 @@ export function installFunction() {
     run(["functions", "create", ...settings]);
     console.log(`Created Function ${functionId}`);
   }
+
+  ensureResourceVariable(
+    "functions", "--function-id", functionId, "DATABASE_ID", config.databaseId,
+  );
+  ensureResourceVariable(
+    "functions", "--function-id", functionId, "TABLE_ID", config.tableId,
+  );
 
   run([
     "functions", "create-deployment",

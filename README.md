@@ -77,8 +77,9 @@ frontend. `POLL_INTERVAL_MS` is optional and defaults to `2000`.
 2. Ensure the injected variables above are present. From `infra/`, run
    `npm install && npm run deploy`. The deploy command automatically loads the
    root `.env.local`, and the local Appwrite CLI
-   creates the table, public Function, web Site, deployments, project
-   variables, and conventional proxy rules from the exported values.
+   creates the table, public Function, web Site, deployments, Function runtime
+   variables, Site build variables, and
+   conventional proxy rules from the exported values.
 3. Complete the DNS verification requested by Appwrite for the Function and
    Site custom domains.
 
@@ -90,6 +91,7 @@ authentication before using this pattern for a public production service.
 
 - Web: `cd site && npm install && npm run web`
 - Android: `cd app && npm install && npm run android`
+- Remote Android Expo Go: `cd app && npm run android:remote`
 - Firmware: copy `firmware/include/secrets.example.h` to `secrets.h`, edit it,
   then run `pio run -d firmware --target upload`. The Function URL is injected
   from `APPWRITE_PROJECT_ID`, `APP_NAME`, and `DOMAIN_SUFFIX` during the build.

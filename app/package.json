@@ -6,6 +6,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "android:remote": "node ./scripts/start-remote-android.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

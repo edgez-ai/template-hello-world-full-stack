@@ -2,6 +2,7 @@ import {
   config,
   domainPrefix,
   ensureProxyDomain,
+  ensureResourceVariable,
   exists,
   infraDir,
   run,
@@ -30,6 +31,16 @@ export function installSite() {
   } else {
     run(["sites", "create", ...settings]);
     console.log(`Created Site ${siteId}`);
+  }
+
+  const variables = [
+    ["APP_NAME", config.name],
+    ["APPWRITE_PROJECT_ID", config.projectId],
+    ["DOMAIN_SUFFIX", config.domainSuffix],
+    ["POLL_INTERVAL_MS", config.pollIntervalMs],
+  ];
+  for (const [key, value] of variables) {
+    ensureResourceVariable("sites", "--site-id", siteId, key, value);
   }
 
   run([
