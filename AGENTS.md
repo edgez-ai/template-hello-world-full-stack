@@ -43,9 +43,12 @@ web and mobile call POST. Clients never access TablesDB directly.
 
 ## Global environment contract
 
-Configuration comes from exported environment variables, never checked-in
-environment files or per-channel URLs. Required values are documented in the
-root `README.md`.
+Configuration comes from the Jupyter user pod environment plus the committed,
+non-secret root `.env.local`; never add per-channel URLs. The IoT Dashboard
+injects `APP_NAME` from the workspace name, `DOMAIN_SUFFIX=edgez.biz`, and the
+Appwrite connection variables. `.env.local` defines `DATABASE_ID`, `TABLE_ID`,
+and `POLL_INTERVAL_MS` and must be exported into a new terminal before running
+project commands. Required values are documented in the root `README.md`.
 
 The Function domain convention is:
 
@@ -68,7 +71,8 @@ behavior belongs in `infra/appwrite.mjs`; orchestration belongs in
 `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, and `APPWRITE_API_KEY` configure
 the local Appwrite CLI. `DATABASE_ID` and `TABLE_ID` identify TablesDB
 resources and are installed as Appwrite project variables for the Function.
-Never expose `APPWRITE_API_KEY` to frontend or firmware code.
+The checked-in `.env.local` must contain no credentials. Never expose
+`APPWRITE_API_KEY` to frontend or firmware code.
 
 ## Appwrite workflow
 

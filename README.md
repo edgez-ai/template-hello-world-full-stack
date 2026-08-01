@@ -34,19 +34,30 @@ Open `hello-channels.code-workspace` in VS Code to work on all five folders.
 
 ## Environment
 
-Export the same environment before running infrastructure, Expo, or PlatformIO:
+The managed IoT Dashboard workspace injects these values into the Jupyter user
+pod when it starts:
 
 ```sh
-export APP_NAME=hello
-export DOMAIN_SUFFIX=edgez.biz
-export POLL_INTERVAL_MS=2000
-
-export APPWRITE_ENDPOINT=https://<REGION>.cloud.appwrite.io/v1
-export APPWRITE_PROJECT_ID=<project-id>
-export APPWRITE_API_KEY=<server-api-key>
-export DATABASE_ID=hello-world
-export TABLE_ID=messages
+APP_NAME=<workspace-name>
+DOMAIN_SUFFIX=edgez.biz
+APPWRITE_ENDPOINT=<workspace-appwrite-endpoint>
+APPWRITE_PROJECT_ID=<selected-project-id>
+APPWRITE_API_KEY=<workspace-scoped-server-api-key>
 ```
+
+The repository's committed `.env.local` defines `DATABASE_ID`, `TABLE_ID`,
+and `POLL_INTERVAL_MS`. Export it once in each new terminal before running
+infrastructure, Expo, Vite, or PlatformIO:
+
+```sh
+set -a
+. ./.env.local
+set +a
+```
+
+Outside an IoT Dashboard workspace, also export the five injected values shown
+above yourself. Change `.env.local` to select different database/table IDs or
+polling interval; it contains no credentials.
 
 The public domain prefix is `${APPWRITE_PROJECT_ID}-${APP_NAME}`. With
 `APPWRITE_PROJECT_ID=project123`, `APP_NAME=hello`, and
