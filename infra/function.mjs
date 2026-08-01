@@ -1,0 +1,45 @@
+import {
+  config,
+  domainPrefix,
+  ensureProxyDomain,
+  exists,
+  rootDir,
+  run,
+} from "./appwrite.mjs";
+
+export function installFunction() {
+  const functionId = config.name;
+  const settings = [
+    "--function-id", functionId,
+    "--name", `${config.name} message API`,
+    "--runtime", "node-22",
+    "--execute", "any",
+    "--timeout", "15",
+    "--enabled", "true",
+    "--logging", "true",
+    "--entrypoint", "src/main.js",
+    "--commands", "npm install",
+    "--scopes", "rows.read", "rows.write",
+  ];
+
+  if (exists(["functions", "get", "--function-id", functionId])) {
+    run(["functions", "update", ...settings]);
+    console.log(`Updated Function ${functionId}`);
+  } else {
+    run(["functions", "create", ...settings]);
+    console.log(`Created Function ${functionId}`);
+  }
+
+  run([
+    "functions", "create-deployment",
+    "--function-id", functionId,
+    "--code", "function",
+    "--activate", "true",
+    "--entrypoint", "src/main.js",
+    "--commands", "npm install",
+  ], { cwd: rootDir });
+
+  const domain = `${domainPrefix}.functions.${config.domainSuffix}`;
+  ensureProxyDomain("Function", functionId, domain);
+  console.log(`Function URL: https://${domain}/message`);
+}

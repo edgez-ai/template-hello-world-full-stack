@@ -1,7 +1,7 @@
 import { Client, ID, Query, TablesDB } from "node-appwrite";
 
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID;
-const TABLE_ID = process.env.APPWRITE_TABLE_ID;
+const DATABASE_ID = process.env.DATABASE_ID;
+const TABLE_ID = process.env.TABLE_ID;
 const allowedSources = new Set(["web", "mobile", "api"]);
 
 function reply(res, payload, status = 200) {

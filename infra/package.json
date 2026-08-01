@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "init": "node init-appwrite.js",
-    "check": "node --check init-appwrite.js"
+    "install:project": "node install-appwrite.mjs",
+    "init": "npm run install:project",
+    "check": "node --check appwrite.mjs && node --check database.mjs && node --check function.mjs && node --check site.mjs && node --check install-appwrite.mjs"
   },
   "dependencies": {
-    "node-appwrite": "^20.0.0"
+    "appwrite-cli": "^20.0.0"
   }
 }
-

@@ -15,11 +15,11 @@ allowed to read or write the database table.
 
 | Folder | Purpose |
 | --- | --- |
-| `site/` | Expo / React Native Web frontend |
-| `app/` | Expo / React Native iOS and Android frontend |
+| `site/` | Pure Vite + React web frontend |
+| `app/` | Expo + React Native Android frontend |
 | `function/` | Public Appwrite Function with `GET /message` and `POST /message` |
 | `firmware/` | PlatformIO ESP32-S3 firmware for a 128x64 SSD1306 display |
-| `infra/` | Rerunnable Appwrite database/table initializer |
+| `infra/` | Rerunnable Appwrite CLI project installer |
 
 Open `hello-channels.code-workspace` in VS Code to work on all five folders.
 
@@ -28,7 +28,7 @@ Open `hello-channels.code-workspace` in VS Code to work on all five folders.
 1. Web or mobile sends `{ "message": "world", "source": "web|mobile" }`
    to `POST /message` on the Appwrite Function domain.
 2. The Function writes `message`, `echo`, and `source` to the Appwrite
-   `hello-world/messages` table and returns the created row.
+   `${DATABASE_ID}/${TABLE_ID}` table and returns the created row.
 3. Web, mobile, and ESP32-S3 poll `GET /message` every two seconds.
 4. Each channel renders the latest `echo`, for example `Hello world`.
 
@@ -44,26 +44,29 @@ export POLL_INTERVAL_MS=2000
 export APPWRITE_ENDPOINT=https://<REGION>.cloud.appwrite.io/v1
 export APPWRITE_PROJECT_ID=<project-id>
 export APPWRITE_API_KEY=<server-api-key>
-export APPWRITE_DATABASE_ID=hello-world
-export APPWRITE_TABLE_ID=messages
+export DATABASE_ID=hello-world
+export TABLE_ID=messages
 ```
 
-`APP_NAME` is the global naming prefix. `APP_NAME=hello` and
-`DOMAIN_SUFFIX=edgez.biz` always derive the shared Function base URL as
-`https://hello.functions.edgez.biz`; no channel has its own URL setting.
+The public domain prefix is `${APPWRITE_PROJECT_ID}-${APP_NAME}`. With
+`APPWRITE_PROJECT_ID=project123`, `APP_NAME=hello`, and
+`DOMAIN_SUFFIX=edgez.biz`, every channel derives the shared Function base URL
+as `https://project123-hello.functions.edgez.biz`; no channel has its own URL
+setting. The hosted React site follows the parallel convention
+`https://project123-hello.sites.edgez.biz`.
 `APPWRITE_API_KEY` is needed only by `infra/` and must not be exposed to a
 frontend. `POLL_INTERVAL_MS` is optional and defaults to `2000`.
 
 ## Appwrite setup
 
-1. Create an Appwrite project and an API key with database/table management
-   scopes. Export the variables above, then run `npm install && npm run init`
-   from `infra/`.
-2. Create a Node.js Appwrite Function using `function/`, with entrypoint
-   `src/main.js`. Give its dynamic API key row read/write access.
-3. Set the Function variables `APPWRITE_DATABASE_ID` and `APPWRITE_TABLE_ID`.
-4. Set Function execute access to **Any**, deploy it, and configure the custom
-   domain `${APP_NAME}.functions.${DOMAIN_SUFFIX}` in Appwrite and DNS.
+1. Create an Appwrite project and an API key with sufficient database,
+   Function, project-variable, and proxy-rule access.
+2. Export the variables above. From `infra/`, run
+   `npm install && npm run install:project`. The local Appwrite CLI
+   creates the table, public Function, web Site, deployments, project
+   variables, and conventional proxy rules from the exported values.
+3. Complete the DNS verification requested by Appwrite for the Function and
+   Site custom domains.
 
 Because this example intentionally has no authentication, anyone who knows the
 Function URL can read and submit messages. Add rate limiting, moderation, and
@@ -72,13 +75,14 @@ authentication before using this pattern for a public production service.
 ## Run clients
 
 - Web: `cd site && npm install && npm run web`
-- Mobile: `cd app && npm install && npm run android` (or `npm run ios`)
+- Android: `cd app && npm install && npm run android`
 - Firmware: copy `firmware/include/secrets.example.h` to `secrets.h`, edit it,
   then run `pio run -d firmware --target upload`. The Function URL is injected
-  from `APP_NAME` and `DOMAIN_SUFFIX` during the build.
+  from `APPWRITE_PROJECT_ID`, `APP_NAME`, and `DOMAIN_SUFFIX` during the build.
 
 The firmware defaults to an external SSD1306 128x64 I2C display on SDA 8 and
 SCL 9. Override `DISPLAY_SDA`, `DISPLAY_SCL`, or the U8g2 constructor for your
 specific ESP32-S3 display board.
 
-this is a boilerplate for all template to cover all features
+This repository is intended as a reusable full-stack boilerplate covering web,
+mobile, backend Function, database infrastructure, and device firmware.

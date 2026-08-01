@@ -2,25 +2,22 @@
   "name": "hello-channels-site",
   "version": "1.0.0",
   "private": true,
-  "main": "expo/AppEntry.js",
   "scripts": {
-    "start": "expo start --web",
-    "web": "expo start --web",
-    "build": "expo export --platform web",
+    "start": "vite",
+    "dev": "vite",
+    "web": "vite",
+    "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~6.1.2",
-    "expo": "~55.0.0",
-    "expo-constants": "~55.0.17",
-    "expo-status-bar": "~3.0.9",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-native": "0.83.0",
-    "react-native-web": "^0.21.2"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/react": "~19.2.0",
-    "typescript": "~5.9.2"
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.0"
   }
 }

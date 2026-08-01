@@ -1,11 +1,13 @@
 const name = process.env.APP_NAME;
+const projectId = process.env.APPWRITE_PROJECT_ID;
 const domainSuffix = process.env.DOMAIN_SUFFIX;
 const pollIntervalMs = Number(process.env.POLL_INTERVAL_MS || "2000");
 
-if (!name || !domainSuffix) {
-  throw new Error("APP_NAME and DOMAIN_SUFFIX must be exported before starting Expo");
+if (!name || !projectId || !domainSuffix) {
+  throw new Error("APP_NAME, APPWRITE_PROJECT_ID, and DOMAIN_SUFFIX must be exported before starting Expo");
 }
 const bundlePrefix = domainSuffix.split(".").reverse().join(".");
+const domainPrefix = `${projectId}-${name}`;
 
 module.exports = {
   expo: {
@@ -14,15 +16,11 @@ module.exports = {
     version: "1.0.0",
     orientation: "portrait",
     userInterfaceStyle: "light",
-    ios: {
-      supportsTablet: true,
-      bundleIdentifier: `${bundlePrefix}.${name}`,
-    },
     android: {
       package: `${bundlePrefix}.${name}`,
     },
     extra: {
-      functionUrl: `https://${name}.functions.${domainSuffix}`,
+      functionUrl: `https://${domainPrefix}.functions.${domainSuffix}`,
       pollIntervalMs,
     },
   },

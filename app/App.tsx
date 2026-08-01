@@ -28,7 +28,9 @@ const functionUrl = (stack?.functionUrl ?? "").replace(/\/+$/, "");
 const pollIntervalMs = stack?.pollIntervalMs ?? 2000;
 
 async function request(method: "GET" | "POST", message?: string) {
-  if (!functionUrl) throw new Error("Export APP_NAME and DOMAIN_SUFFIX first.");
+  if (!functionUrl) {
+    throw new Error("Export APPWRITE_PROJECT_ID, APP_NAME, and DOMAIN_SUFFIX first.");
+  }
   const response = await fetch(`${functionUrl}/message`, {
     method,
     headers: { "content-type": "application/json" },
