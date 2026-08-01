@@ -6,3 +6,6 @@ dist/
 firmware/.pio/
 firmware/include/secrets.h
 infra/appwrite.config.json
+app/android/build.gradle
+firmware/.vscode/extensions.json
+.gitignore

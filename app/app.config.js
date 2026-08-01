@@ -8,6 +8,7 @@ if (!name || !projectId || !domainSuffix) {
 }
 const bundlePrefix = domainSuffix.split(".").reverse().join(".");
 const domainPrefix = `${projectId}-${name}`;
+const androidName = name.replace(/[^A-Za-z0-9_]/g, "_").replace(/^[^A-Za-z_]+/, "app");
 
 module.exports = {
   expo: {
@@ -17,7 +18,7 @@ module.exports = {
     orientation: "portrait",
     userInterfaceStyle: "light",
     android: {
-      package: `${bundlePrefix}.${name}`,
+      package: `${bundlePrefix}.${androidName}`,
     },
     extra: {
       functionUrl: `https://${domainPrefix}.functions.${domainSuffix}`,
