@@ -1,10 +1,19 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 
 export const infraDir = path.dirname(fileURLToPath(import.meta.url));
 export const rootDir = path.resolve(infraDir, "..");
+const localEnvFile = path.join(rootDir, ".env.local");
+
+// Values injected into the workspace pod remain authoritative; load the
+// repository defaults only for variables that are not already in the process.
+if (existsSync(localEnvFile)) {
+  loadEnvFile(localEnvFile);
+}
+
 const cli = path.join(infraDir, "node_modules", ".bin", "appwrite");
 export const dryRun = process.env.INFRA_DRY_RUN === "1";
 

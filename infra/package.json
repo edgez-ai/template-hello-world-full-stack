@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "deploy": "node install-appwrite.mjs",
     "install:project": "node install-appwrite.mjs",
     "init": "npm run install:project",
     "check": "node --check appwrite.mjs && node --check database.mjs && node --check function.mjs && node --check site.mjs && node --check install-appwrite.mjs"

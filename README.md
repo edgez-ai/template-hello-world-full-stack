@@ -46,8 +46,10 @@ APPWRITE_API_KEY=<workspace-scoped-server-api-key>
 ```
 
 The repository's committed `.env.local` defines `DATABASE_ID`, `TABLE_ID`,
-and `POLL_INTERVAL_MS`. Export it once in each new terminal before running
-infrastructure, Expo, Vite, or PlatformIO:
+and `POLL_INTERVAL_MS`. The infrastructure deploy command loads this file
+automatically and combines it with the variables injected into the user pod.
+For direct Expo, Vite, or PlatformIO commands, export it once in each new
+terminal:
 
 ```sh
 set -a
@@ -72,8 +74,9 @@ frontend. `POLL_INTERVAL_MS` is optional and defaults to `2000`.
 
 1. Create an Appwrite project and an API key with sufficient database,
    Function, project-variable, and proxy-rule access.
-2. Export the variables above. From `infra/`, run
-   `npm install && npm run install:project`. The local Appwrite CLI
+2. Ensure the injected variables above are present. From `infra/`, run
+   `npm install && npm run deploy`. The deploy command automatically loads the
+   root `.env.local`, and the local Appwrite CLI
    creates the table, public Function, web Site, deployments, project
    variables, and conventional proxy rules from the exported values.
 3. Complete the DNS verification requested by Appwrite for the Function and

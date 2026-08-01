@@ -47,8 +47,9 @@ Configuration comes from the Jupyter user pod environment plus the committed,
 non-secret root `.env.local`; never add per-channel URLs. The IoT Dashboard
 injects `APP_NAME` from the workspace name, `DOMAIN_SUFFIX=edgez.biz`, and the
 Appwrite connection variables. `.env.local` defines `DATABASE_ID`, `TABLE_ID`,
-and `POLL_INTERVAL_MS` and must be exported into a new terminal before running
-project commands. Required values are documented in the root `README.md`.
+and `POLL_INTERVAL_MS`. The infrastructure deploy entrypoint loads it
+automatically; export it into a new terminal for direct client or firmware
+commands. Required values are documented in the root `README.md`.
 
 The Function domain convention is:
 
@@ -83,14 +84,15 @@ is still the CLI workflow in `infra/`:
 ```sh
 cd infra
 npm install
-npm run install:project
+npm run deploy
 ```
 
-The installer configures the local CLI from environment variables, then
-idempotently creates or updates the database, messages table, project
-variables, public Node 22 Function, React web Site, deployments, and
-both conventional proxy rules. DNS must point both domains at the targets
-Appwrite reports.
+The deploy entrypoint loads the root `.env.local`, combines it with injected
+workspace variables, configures the local CLI, and installs all five global
+values as Appwrite project variables before creating deployments. It then
+idempotently creates or updates the database, messages table, public Function,
+React web Site, deployments, and both conventional proxy rules. DNS must point
+both domains at the targets Appwrite reports.
 
 The installer changes remote state. Do not run it merely to test local code;
 run `npm run check` for local validation. Only run remote installation when the
