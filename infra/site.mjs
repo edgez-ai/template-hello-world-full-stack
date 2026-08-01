@@ -3,7 +3,7 @@ import {
   domainPrefix,
   ensureProxyDomain,
   exists,
-  rootDir,
+  infraDir,
   run,
 } from "./appwrite.mjs";
 
@@ -35,12 +35,12 @@ export function installSite() {
   run([
     "sites", "create-deployment",
     "--site-id", siteId,
-    "--code", "site",
+    "--code", "../site",
     "--install-command", "npm install",
     "--build-command", "npm run build",
     "--output-directory", "dist",
     "--activate", "true",
-  ], { cwd: rootDir });
+  ], { cwd: infraDir });
 
   const domain = `${domainPrefix}.sites.${config.domainSuffix}`;
   ensureProxyDomain("Site", siteId, domain);

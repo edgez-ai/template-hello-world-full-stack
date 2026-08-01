@@ -3,7 +3,7 @@ import {
   domainPrefix,
   ensureProxyDomain,
   exists,
-  rootDir,
+  infraDir,
   run,
 } from "./appwrite.mjs";
 
@@ -12,7 +12,7 @@ export function installFunction() {
   const settings = [
     "--function-id", functionId,
     "--name", `${config.name} message API`,
-    "--runtime", "node-22",
+    "--runtime", "node-24",
     "--execute", "any",
     "--timeout", "15",
     "--enabled", "true",
@@ -33,11 +33,11 @@ export function installFunction() {
   run([
     "functions", "create-deployment",
     "--function-id", functionId,
-    "--code", "function",
+    "--code", "../function",
     "--activate", "true",
     "--entrypoint", "src/main.js",
     "--commands", "npm install",
-  ], { cwd: rootDir });
+  ], { cwd: infraDir });
 
   const domain = `${domainPrefix}.functions.${config.domainSuffix}`;
   ensureProxyDomain("Function", functionId, domain);

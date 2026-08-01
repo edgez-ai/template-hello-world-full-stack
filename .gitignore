@@ -5,3 +5,4 @@ dist/
 .env
 firmware/.pio/
 firmware/include/secrets.h
+infra/appwrite.config.json
