@@ -1,0 +1,14 @@
+{
+  "name": "hello-channels-infra",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "init": "node init-appwrite.js",
+    "check": "node --check init-appwrite.js"
+  },
+  "dependencies": {
+    "node-appwrite": "^20.0.0"
+  }
+}
+

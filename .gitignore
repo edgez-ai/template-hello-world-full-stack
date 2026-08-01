@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+.expo/
+dist/
+.env
+.env.local
+firmware/.pio/
+firmware/include/secrets.h
+
