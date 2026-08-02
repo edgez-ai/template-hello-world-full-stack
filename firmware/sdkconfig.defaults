@@ -9,3 +9,6 @@ CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 CONFIG_ESP_CONSOLE_UART_DEFAULT=y
 CONFIG_ESP_CONSOLE_UART_NUM=0
 CONFIG_ESP_CONSOLE_UART_BAUDRATE=115200
+# Use ESP-IDF's bundled partitions_singleapp_large.csv. BLE provisioning plus
+# TLS exceeds the 1 MiB factory slot in the default partition layout.
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
