@@ -16,7 +16,8 @@ pio device monitor
 
 The project pins PlatformIO Espressif32 6.13.0, which supplies ESP-IDF 5.5.3,
 and targets `heltec_wifi_lora_32_V3`. No Wi-Fi credentials or firmware secrets
-files are required.
+files are required. `partitions.csv` defines a 3 MiB factory application slot
+and a 24 KiB NVS partition; the latter stores the provisioned Wi-Fi settings.
 
 ## Provision Wi-Fi
 
