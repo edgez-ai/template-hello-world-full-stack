@@ -4,6 +4,7 @@ node_modules/
 dist/
 .env
 firmware/.pio/
+firmware/managed_components/
 firmware/include/secrets.h
 infra/appwrite.config.json
 app/android/build.gradle
