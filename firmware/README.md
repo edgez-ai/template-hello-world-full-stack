@@ -31,9 +31,16 @@ Espressif-compatible provisioning client with:
 - Proof of possession: the `hc-...` value shown by the board
 
 After provisioning succeeds, ESP-IDF stores the credentials in NVS, releases
-the Bluetooth memory, connects in station mode, and begins HTTPS polling. To
-discard stored credentials and provision another network, erase flash and
-upload again:
+the Bluetooth memory, connects in station mode, and begins HTTPS polling.
+The OLED reports provisioning, connecting, network-not-found, authentication
+failure, reconnecting, and connected-IP states before returning to the latest
+echo display.
+
+To discard stored credentials, press and hold the Heltec `USER/PRG` button on
+GPIO 0 for five seconds after the firmware has booted. The OLED shows the
+countdown, the firmware restores the persistent Wi-Fi settings, and the board
+restarts in BLE provisioning mode. Releasing the button early cancels the
+reset. Erasing flash remains available as a recovery option:
 
 ```sh
 pio run --target erase
