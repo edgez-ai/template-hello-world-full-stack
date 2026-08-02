@@ -67,7 +67,7 @@ void make_provisioning_identity() {
   ESP_ERROR_CHECK(esp_read_mac(mac, ESP_MAC_WIFI_STA));
   snprintf(provisioning_name, sizeof(provisioning_name), "PROV_%02X%02X%02X",
            mac[3], mac[4], mac[5]);
-  strlcpy(provisioning_pop, "123456", sizeof(provisioning_pop));
+  strlcpy(provisioning_pop, "abcd1234", sizeof(provisioning_pop));
 }
 
 void wifi_start_station() {

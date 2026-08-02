@@ -29,7 +29,7 @@ Espressif-compatible provisioning client with:
 - Transport: BLE
 - Security: Security 1
 - Device name: the `PROV_...` value shown by the board
-- Proof of possession (PIN): `123456`
+- Proof of possession (PIN): `abcd1234`
 
 After provisioning succeeds, ESP-IDF stores the credentials in NVS, releases
 the Bluetooth memory, connects in station mode, and begins HTTPS polling.
