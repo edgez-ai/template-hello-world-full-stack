@@ -54,23 +54,24 @@ commands. Required values are documented in the root `README.md`.
 The Function domain convention is:
 
 ```text
-https://${APPWRITE_PROJECT_ID}-${APP_NAME}.functions.${DOMAIN_SUFFIX}
+https://${APPWRITE_PROJECT_NAME}-${APP_NAME}.functions.${DOMAIN_SUFFIX}
 ```
 
-For `APPWRITE_PROJECT_ID=project123`, `APP_NAME=hello`, and
+For `APPWRITE_PROJECT_NAME=project123`, `APP_NAME=hello`, and
 `DOMAIN_SUFFIX=edgez.biz`, every channel must derive
 `https://project123-hello.functions.edgez.biz`. Do not add a separate Function
 URL to `site/`, `app/`, or `firmware/`.
 
 The Appwrite Site convention is
-`https://${APPWRITE_PROJECT_ID}-${APP_NAME}.sites.${DOMAIN_SUFFIX}`. Site,
+`https://${APPWRITE_PROJECT_NAME}-${APP_NAME}.sites.${DOMAIN_SUFFIX}`. Site,
 Function, and database resource definitions must remain in `infra/site.mjs`,
 `infra/function.mjs`, and `infra/database.mjs`, respectively. Shared CLI
 behavior belongs in `infra/appwrite.mjs`; orchestration belongs in
 `infra/install-appwrite.mjs`.
 
 `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, and `APPWRITE_API_KEY` configure
-the local Appwrite CLI. `DATABASE_ID` and `TABLE_ID` identify TablesDB
+the local Appwrite CLI. `APPWRITE_PROJECT_NAME` is the DNS-safe public-domain
+prefix. `DATABASE_ID` and `TABLE_ID` identify TablesDB
 resources and are installed as Appwrite project variables for the Function.
 The checked-in `.env.local` must contain no credentials. Never expose
 `APPWRITE_API_KEY` to frontend or firmware code.
@@ -101,12 +102,25 @@ The installer changes remote state. Do not run it merely to test local code;
 run `npm run check` for local validation. Only run remote installation when the
 user asks to provision or update Appwrite.
 
+## Mobile workflow
+
+The Android client runs with Expo Go on the remote Android device connected at
+`127.0.0.1:5555`. From `app/`, use `npm run android`; that task starts Metro on
+localhost and explicitly opens its `exp://` URL in the remote Expo Go app.
+`ANDROID_SERIAL` and `EXPO_PORT` may override the defaults.
+
+Do not perform a local native Android build by default. Do not run Gradle,
+`expo run:android`, or create an APK unless the user explicitly asks for a
+native build. For code-only validation, use `npm run typecheck`; when the user
+asks to run or test the mobile application, use `npm run android`.
+
 ## Validation
 
 Use the same exported environment for every command.
 
 - Web: `cd site && npm run typecheck && npm run build`
-- Mobile: `cd app && npm run typecheck`
+- Mobile code validation: `cd app && npm run typecheck`
+- Mobile runtime validation when requested: `cd app && npm run android`
 - Function: `cd function && npm run check`
 - Infrastructure: `cd infra && npm run check`
 - Firmware: `cd firmware && pio run`. Wi-Fi credentials are provisioned over

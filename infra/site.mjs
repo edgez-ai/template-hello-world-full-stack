@@ -35,7 +35,7 @@ export function installSite() {
 
   const variables = [
     ["APP_NAME", config.name],
-    ["APPWRITE_PROJECT_ID", config.projectId],
+    ["APPWRITE_PROJECT_NAME", config.projectName],
     ["DOMAIN_SUFFIX", config.domainSuffix],
     ["POLL_INTERVAL_MS", config.pollIntervalMs],
   ];

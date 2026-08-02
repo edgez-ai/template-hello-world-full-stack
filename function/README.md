@@ -11,4 +11,4 @@ methods:
 execute access as `Any` and give its dynamic API key row read/write access.
 `DATABASE_ID` and `TABLE_ID` are Appwrite project variables installed by
 `infra/`. The public custom domain follows
-`${APPWRITE_PROJECT_ID}-${APP_NAME}.functions.${DOMAIN_SUFFIX}`.
+`${APPWRITE_PROJECT_NAME}-${APP_NAME}.functions.${DOMAIN_SUFFIX}`.

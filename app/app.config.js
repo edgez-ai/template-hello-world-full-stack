@@ -1,13 +1,13 @@
 const name = process.env.APP_NAME;
-const projectId = process.env.APPWRITE_PROJECT_ID;
+const projectName = process.env.APPWRITE_PROJECT_NAME;
 const domainSuffix = process.env.DOMAIN_SUFFIX;
 const pollIntervalMs = Number(process.env.POLL_INTERVAL_MS || "2000");
 
-if (!name || !projectId || !domainSuffix) {
-  throw new Error("APP_NAME, APPWRITE_PROJECT_ID, and DOMAIN_SUFFIX must be exported before starting Expo");
+if (!name || !projectName || !domainSuffix) {
+  throw new Error("APP_NAME, APPWRITE_PROJECT_NAME, and DOMAIN_SUFFIX must be exported before starting Expo");
 }
 const bundlePrefix = domainSuffix.split(".").reverse().join(".");
-const domainPrefix = `${projectId}-${name}`;
+const domainPrefix = `${projectName}-${name}`;
 const androidName = name.replace(/[^A-Za-z0-9_]/g, "_").replace(/^[^A-Za-z_]+/, "app");
 
 module.exports = {

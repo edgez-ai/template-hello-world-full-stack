@@ -27,6 +27,7 @@ const required = [
   "DOMAIN_SUFFIX",
   "APPWRITE_ENDPOINT",
   "APPWRITE_PROJECT_ID",
+  "APPWRITE_PROJECT_NAME",
   "APPWRITE_API_KEY",
   "DATABASE_ID",
   "TABLE_ID",
@@ -42,16 +43,23 @@ export const config = {
   domainSuffix: process.env.DOMAIN_SUFFIX,
   endpoint: process.env.APPWRITE_ENDPOINT,
   projectId: process.env.APPWRITE_PROJECT_ID,
+  projectName: process.env.APPWRITE_PROJECT_NAME,
   apiKey: process.env.APPWRITE_API_KEY,
   databaseId: process.env.DATABASE_ID,
   tableId: process.env.TABLE_ID,
   pollIntervalMs: process.env.POLL_INTERVAL_MS || "2000",
 };
 
-export const domainPrefix = `${config.projectId}-${config.name}`;
+export const domainPrefix = `${config.projectName}-${config.name}`;
 
 if (!/^[a-z][a-z0-9-]*$/.test(config.name)) {
   throw new Error("APP_NAME must be a lowercase DNS-safe prefix");
+}
+if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(config.projectName)) {
+  throw new Error("APPWRITE_PROJECT_NAME must be a lowercase DNS-safe prefix");
+}
+if (domainPrefix.length > 63) {
+  throw new Error("APPWRITE_PROJECT_NAME plus APP_NAME must fit in one 63-character DNS label");
 }
 if (!/^[a-z0-9.-]+$/.test(config.domainSuffix)) {
   throw new Error("DOMAIN_SUFFIX must be a valid lowercase DNS suffix");

@@ -42,6 +42,7 @@ APP_NAME=<workspace-name>
 DOMAIN_SUFFIX=edgez.biz
 APPWRITE_ENDPOINT=<workspace-appwrite-endpoint>
 APPWRITE_PROJECT_ID=<selected-project-id>
+APPWRITE_PROJECT_NAME=<selected-project-name>
 APPWRITE_API_KEY=<workspace-scoped-server-api-key>
 ```
 
@@ -57,12 +58,12 @@ set -a
 set +a
 ```
 
-Outside an IoT Dashboard workspace, also export the five injected values shown
+Outside an IoT Dashboard workspace, also export the six injected values shown
 above yourself. Change `.env.local` to select different database/table IDs or
 polling interval; it contains no credentials.
 
-The public domain prefix is `${APPWRITE_PROJECT_ID}-${APP_NAME}`. With
-`APPWRITE_PROJECT_ID=project123`, `APP_NAME=hello`, and
+The public domain prefix is `${APPWRITE_PROJECT_NAME}-${APP_NAME}`. With
+`APPWRITE_PROJECT_NAME=project123`, `APP_NAME=hello`, and
 `DOMAIN_SUFFIX=edgez.biz`, every channel derives the shared Function base URL
 as `https://project123-hello.functions.edgez.biz`; no channel has its own URL
 setting. The hosted React site follows the parallel convention
@@ -90,11 +91,10 @@ authentication before using this pattern for a public production service.
 ## Run clients
 
 - Web: `cd site && npm install && npm run web`
-- Android: `cd app && npm install && npm run android`
-- Remote Android Expo Go: `cd app && npm run android:remote`
+- Remote Android Expo Go: `cd app && npm install && npm run android`
 - Firmware: run `pio run -d firmware --target upload`. On first boot, provision
   Wi-Fi over BLE using the device name and proof-of-possession shown on its
-  display. The Function URL is injected from `APPWRITE_PROJECT_ID`, `APP_NAME`,
+  display. The Function URL is injected from `APPWRITE_PROJECT_NAME`, `APP_NAME`,
   and `DOMAIN_SUFFIX` during the build.
 
 The firmware targets the Heltec WiFi LoRa 32 V3 onboard SSD1306 display. It
