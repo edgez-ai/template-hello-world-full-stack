@@ -12,5 +12,6 @@ idf_component_register(
     mbedtls
     nvs_flash
     protocomm
+    u8g2
     wifi_provisioning
 )
