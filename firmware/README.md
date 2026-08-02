@@ -1,10 +1,43 @@
-# ESP32-S3 display client
+# Heltec WiFi LoRa 32 V3 firmware
 
-This read-only client polls `GET /message` every two seconds and shows the
-latest `echo` on a 128x64 SSD1306 I2C display.
+This is a native ESP-IDF firmware project built through PlatformIO. The Heltec
+independently polls `GET /message` and shows the latest server-generated `echo`
+on its onboard 128x64 SSD1306 display. BLE is used only to provision Wi-Fi.
 
-Copy `include/secrets.example.h` to `include/secrets.h` and set Wi-Fi. Export
-the root README environment, then upload with PlatformIO. The Function URL is
-derived during the build. The default target is an ESP32-S3 DevKitC-1 with SDA
-8 and SCL 9. Integrated-display boards may require a different PlatformIO
-board, pins, and U8g2 display constructor.
+## Build and upload
+
+Export the root project environment so `FUNCTION_URL` and `POLL_INTERVAL_MS`
+can be derived, then run:
+
+```sh
+pio run --target upload
+pio device monitor
+```
+
+The project pins PlatformIO Espressif32 6.13.0, which supplies ESP-IDF 5.5.3,
+and targets `heltec_wifi_lora_32_V3`. No Wi-Fi credentials or firmware secrets
+files are required.
+
+## Provision Wi-Fi
+
+When no credentials exist in NVS, the OLED and serial log show a BLE device
+name such as `HC_A1B2C3` and a proof-of-possession such as `hc-a1b2c3`. Use an
+Espressif-compatible provisioning client with:
+
+- Transport: BLE
+- Security: Security 1
+- Device name: the `HC_...` value shown by the board
+- Proof of possession: the `hc-...` value shown by the board
+
+After provisioning succeeds, ESP-IDF stores the credentials in NVS, releases
+the Bluetooth memory, connects in station mode, and begins HTTPS polling. To
+discard stored credentials and provision another network, erase flash and
+upload again:
+
+```sh
+pio run --target erase
+pio run --target upload
+```
+
+The onboard display connections are SDA 17, SCL 18, reset 21, and active-low
+Vext power on GPIO 36.

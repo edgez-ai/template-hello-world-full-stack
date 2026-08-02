@@ -18,7 +18,7 @@ allowed to read or write the database table.
 | `site/` | Pure Vite + React web frontend |
 | `app/` | Expo + React Native Android frontend |
 | `function/` | Public Appwrite Function with `GET /message` and `POST /message` |
-| `firmware/` | PlatformIO ESP32-S3 firmware for a 128x64 SSD1306 display |
+| `firmware/` | PlatformIO + ESP-IDF firmware for the Heltec WiFi LoRa 32 V3 |
 | `infra/` | Rerunnable Appwrite CLI project installer |
 
 Open `hello-channels.code-workspace` in VS Code to work on all five folders.
@@ -92,13 +92,15 @@ authentication before using this pattern for a public production service.
 - Web: `cd site && npm install && npm run web`
 - Android: `cd app && npm install && npm run android`
 - Remote Android Expo Go: `cd app && npm run android:remote`
-- Firmware: copy `firmware/include/secrets.example.h` to `secrets.h`, edit it,
-  then run `pio run -d firmware --target upload`. The Function URL is injected
-  from `APPWRITE_PROJECT_ID`, `APP_NAME`, and `DOMAIN_SUFFIX` during the build.
+- Firmware: run `pio run -d firmware --target upload`. On first boot, provision
+  Wi-Fi over BLE using the device name and proof-of-possession shown on its
+  display. The Function URL is injected from `APPWRITE_PROJECT_ID`, `APP_NAME`,
+  and `DOMAIN_SUFFIX` during the build.
 
-The firmware defaults to an external SSD1306 128x64 I2C display on SDA 8 and
-SCL 9. Override `DISPLAY_SDA`, `DISPLAY_SCL`, or the U8g2 constructor for your
-specific ESP32-S3 display board.
+The firmware targets the Heltec WiFi LoRa 32 V3 onboard SSD1306 display. It
+uses ESP-IDF BLE only for secure Wi-Fi provisioning, stores credentials in NVS,
+releases Bluetooth after provisioning, and independently polls the same public
+Function endpoint as the web and mobile clients.
 
 This repository is intended as a reusable full-stack boilerplate covering web,
 mobile, backend Function, database infrastructure, and device firmware.

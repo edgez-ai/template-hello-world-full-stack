@@ -21,7 +21,7 @@ that requirement.
 | `site/` | Pure Vite + React DOM frontend. Posts as `source: "web"`. |
 | `app/` | Expo + React Native Android frontend. Posts as `source: "mobile"`. |
 | `function/` | Node 22 Appwrite Function and the only TablesDB reader/writer. |
-| `firmware/` | PlatformIO ESP32-S3 client for an SSD1306 display. GET polling only. |
+| `firmware/` | PlatformIO + ESP-IDF Heltec WiFi LoRa 32 V3 client. BLE provisions Wi-Fi; GET polling displays the echo. |
 | `infra/` | Reproducible Appwrite CLI installer split by resource type. |
 | `README.md` | Human setup instructions and the environment-variable contract. |
 
@@ -109,8 +109,8 @@ Use the same exported environment for every command.
 - Mobile: `cd app && npm run typecheck`
 - Function: `cd function && npm run check`
 - Infrastructure: `cd infra && npm run check`
-- Firmware: create ignored `firmware/include/secrets.h`, then
-  `cd firmware && pio run`
+- Firmware: `cd firmware && pio run`. Wi-Fi credentials are provisioned over
+  ESP-IDF BLE and stored in NVS; never add them to source files.
 
 Do not commit `.env`, Appwrite keys, Wi-Fi credentials, `node_modules/`,
 `dist/`, or `.pio/`.
