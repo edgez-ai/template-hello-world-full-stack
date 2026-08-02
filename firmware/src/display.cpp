@@ -9,6 +9,7 @@
 #include "esp_check.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
+#include "u8g2.h"
 
 namespace {
 constexpr i2c_port_t kI2cPort = I2C_NUM_0;
@@ -23,6 +24,23 @@ constexpr int kPages = kHeight / 8;
 
 uint8_t framebuffer[kWidth * kPages];
 SemaphoreHandle_t display_mutex;
+u8g2_t cjk_renderer;
+
+struct DisplayGlyph {
+  uint16_t codepoint;
+  const uint8_t *font;
+  uint8_t width;
+};
+
+struct DisplayLine {
+  size_t start;
+  size_t end;
+  uint16_t width;
+};
+
+uint8_t no_op_display_callback(u8x8_t *, uint8_t, uint8_t, void *) {
+  return 1;
+}
 
 esp_err_t send_command(const uint8_t *commands, size_t length) {
   uint8_t buffer[32] = {0};
@@ -147,6 +165,135 @@ void draw_wrapped(const char *message) {
     draw_text(0, 17 + line * 9, row, kCharactersPerLine);
   }
 }
+
+uint32_t next_codepoint(const char *&text) {
+  const auto first = static_cast<uint8_t>(*text++);
+  if (first < 0x80) return first;
+
+  uint32_t codepoint = 0;
+  int continuation_count = 0;
+  if ((first & 0xe0) == 0xc0) {
+    codepoint = first & 0x1f;
+    continuation_count = 1;
+  } else if ((first & 0xf0) == 0xe0) {
+    codepoint = first & 0x0f;
+    continuation_count = 2;
+  } else if ((first & 0xf8) == 0xf0) {
+    codepoint = first & 0x07;
+    continuation_count = 3;
+  } else {
+    return '?';
+  }
+
+  for (int index = 0; index < continuation_count; ++index) {
+    const auto byte = static_cast<uint8_t>(*text);
+    if ((byte & 0xc0) != 0x80) return '?';
+    ++text;
+    codepoint = (codepoint << 6) | (byte & 0x3f);
+  }
+  return codepoint <= 0xffff ? codepoint : '?';
+}
+
+const uint8_t *font_for(uint16_t codepoint) {
+  const uint8_t *fonts[] = {
+      u8g2_font_wqy16_t_gb2312,
+      u8g2_font_b16_t_japanese3,
+      u8g2_font_gulim14_t_korean2,
+      u8g2_font_unifont_t_extended,
+  };
+  for (const auto *font : fonts) {
+    u8g2_SetFont(&cjk_renderer, font);
+    if (u8g2_IsGlyph(&cjk_renderer, codepoint)) return font;
+  }
+  return u8g2_font_wqy16_t_gb2312;
+}
+
+size_t decode_message(const char *message, DisplayGlyph *glyphs,
+                      size_t capacity) {
+  size_t count = 0;
+  const char *cursor = message ? message : "";
+  while (*cursor && count < capacity) {
+    uint32_t decoded = next_codepoint(cursor);
+    if (decoded == '\r') continue;
+    const uint16_t codepoint = static_cast<uint16_t>(decoded);
+    if (codepoint == '\n') {
+      glyphs[count++] = {codepoint, u8g2_font_wqy16_t_gb2312, 0};
+      continue;
+    }
+    const uint8_t *font = font_for(codepoint);
+    u8g2_SetFont(&cjk_renderer, font);
+    int width = u8g2_GetGlyphWidth(&cjk_renderer, codepoint);
+    if (width <= 0) {
+      font = u8g2_font_wqy16_t_gb2312;
+      u8g2_SetFont(&cjk_renderer, font);
+      width = u8g2_GetGlyphWidth(&cjk_renderer, '?');
+      decoded = '?';
+    }
+    glyphs[count++] = {static_cast<uint16_t>(decoded), font,
+                       static_cast<uint8_t>(width)};
+  }
+  return count;
+}
+
+size_t wrap_glyphs(const DisplayGlyph *glyphs, size_t count, int scale,
+                   DisplayLine *lines, size_t line_capacity) {
+  size_t line_count = 0;
+  size_t start = 0;
+  while (start < count && line_count < line_capacity) {
+    while (start < count && glyphs[start].codepoint == ' ') ++start;
+    if (start >= count) break;
+
+    size_t end = start;
+    uint16_t width = 0;
+    while (end < count && glyphs[end].codepoint != '\n') {
+      const uint16_t glyph_width = glyphs[end].width * scale;
+      if (end > start && width + glyph_width > kWidth) break;
+      width += glyph_width;
+      ++end;
+    }
+    lines[line_count++] = {start, end, width};
+    start = end;
+    if (start < count && glyphs[start].codepoint == '\n') ++start;
+  }
+  return line_count;
+}
+
+bool fits_at_scale(const DisplayGlyph *glyphs, size_t count, int scale,
+                   size_t max_lines) {
+  DisplayLine lines[4]{};
+  const size_t line_count = wrap_glyphs(glyphs, count, scale, lines, max_lines);
+  if (line_count == 0) return true;
+  size_t consumed = lines[line_count - 1].end;
+  while (consumed < count &&
+         (glyphs[consumed].codepoint == ' ' ||
+          glyphs[consumed].codepoint == '\n')) {
+    ++consumed;
+  }
+  return consumed == count;
+}
+
+void clear_channel_area(int x, int y, int width, int height) {
+  for (int pixel_y = y; pixel_y < y + height && pixel_y < kHeight; ++pixel_y) {
+    for (int pixel_x = x; pixel_x < x + width && pixel_x < kWidth; ++pixel_x) {
+      framebuffer[pixel_x + (pixel_y / 8) * kWidth] &=
+          ~(1 << (pixel_y % 8));
+    }
+  }
+}
+
+void draw_channel(const char *channel) {
+  char label[12]{};
+  size_t length = 0;
+  for (; channel && channel[length] && length < sizeof(label) - 1; ++length) {
+    label[length] = static_cast<char>(
+        toupper(static_cast<unsigned char>(channel[length])));
+  }
+  if (length == 0) return;
+  const int width = static_cast<int>(length) * 6 - 1;
+  const int x = kWidth - width;
+  clear_channel_area(x - 2, kHeight - 9, width + 2, 9);
+  draw_text(x, kHeight - 7, label, length);
+}
 }  // namespace
 
 esp_err_t display_init() {
@@ -175,6 +322,10 @@ esp_err_t display_init() {
                           0xaf};
   display_mutex = xSemaphoreCreateMutex();
   if (!display_mutex) return ESP_ERR_NO_MEM;
+  u8g2_Setup_ssd1306_128x64_noname_f(
+      &cjk_renderer, U8G2_R0, no_op_display_callback,
+      no_op_display_callback);
+  u8g2_SetFontMode(&cjk_renderer, 1);
   memset(framebuffer, 0, sizeof(framebuffer));
   ESP_RETURN_ON_ERROR(send_command(init, sizeof(init)), "display", "OLED init failed");
   return flush();
@@ -187,6 +338,45 @@ void display_show(const char *title, const char *message) {
   draw_text(0, 0, title ? title : "HELLO CHANNELS", 21);
   memset(framebuffer + kWidth, 0xff, kWidth);
   draw_wrapped(message ? message : "");
+  flush();
+  xSemaphoreGive(display_mutex);
+}
+
+void display_show_message(const char *message, const char *channel) {
+  if (!display_mutex ||
+      xSemaphoreTake(display_mutex, pdMS_TO_TICKS(250)) != pdTRUE) {
+    return;
+  }
+
+  DisplayGlyph glyphs[128]{};
+  const size_t glyph_count =
+      decode_message(message, glyphs, sizeof(glyphs) / sizeof(glyphs[0]));
+  const int scale = fits_at_scale(glyphs, glyph_count, 2, 2) ? 2 : 1;
+  const size_t max_lines = scale == 2 ? 2 : 4;
+  DisplayLine lines[4]{};
+  const size_t line_count =
+      wrap_glyphs(glyphs, glyph_count, scale, lines, max_lines);
+
+  u8g2_ClearBuffer(&cjk_renderer);
+  const int line_height = 16 * scale;
+  const int total_height = static_cast<int>(line_count) * line_height;
+  int baseline = (kHeight - total_height) / 2 + 14 * scale;
+  for (size_t line = 0; line < line_count; ++line) {
+    int x = (kWidth - lines[line].width) / 2;
+    for (size_t index = lines[line].start; index < lines[line].end; ++index) {
+      u8g2_SetFont(&cjk_renderer, glyphs[index].font);
+      if (scale == 2) {
+        u8g2_DrawGlyphX2(&cjk_renderer, x, baseline, glyphs[index].codepoint);
+      } else {
+        u8g2_DrawGlyph(&cjk_renderer, x, baseline, glyphs[index].codepoint);
+      }
+      x += glyphs[index].width * scale;
+    }
+    baseline += line_height;
+  }
+
+  memcpy(framebuffer, u8g2_GetBufferPtr(&cjk_renderer), sizeof(framebuffer));
+  draw_channel(channel);
   flush();
   xSemaphoreGive(display_mutex);
 }

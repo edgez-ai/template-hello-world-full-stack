@@ -35,7 +35,9 @@ After provisioning succeeds, ESP-IDF stores the credentials in NVS, releases
 the Bluetooth memory, connects in station mode, and begins HTTPS polling.
 The OLED reports provisioning, connecting, network-not-found, authentication
 failure, reconnecting, and connected-IP states before returning to the latest
-echo display.
+echo display. Latest messages use a large UTF-8 font with Chinese, Japanese,
+and Korean fallbacks, automatically wrap to fill the 128x64 screen, and show
+the originating channel (`WEB`, `MOBILE`, or `API`) in the bottom-right corner.
 
 To discard stored credentials, press and hold the Heltec `USER/PRG` button on
 GPIO 0 for five seconds after the firmware has booted. The OLED shows the

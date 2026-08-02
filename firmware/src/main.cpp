@@ -39,6 +39,7 @@ bool provisioning_active = false;
 char provisioning_name[16]{};
 char provisioning_pop[16]{};
 char last_echo[512]{};
+char last_source[16]{};
 char wifi_status[96] = "STARTING WI-FI";
 
 struct HttpResponse {
@@ -186,11 +187,17 @@ void fetch_latest_message() {
   cJSON *echo = cJSON_IsObject(message)
                     ? cJSON_GetObjectItemCaseSensitive(message, "echo")
                     : nullptr;
+  cJSON *source = cJSON_IsObject(message)
+                      ? cJSON_GetObjectItemCaseSensitive(message, "source")
+                      : nullptr;
   const char *value = cJSON_IsString(echo) ? echo->valuestring : "SEND A MESSAGE";
-  if (strncmp(last_echo, value, sizeof(last_echo)) != 0) {
+  const char *channel = cJSON_IsString(source) ? source->valuestring : "api";
+  if (strncmp(last_echo, value, sizeof(last_echo)) != 0 ||
+      strncmp(last_source, channel, sizeof(last_source)) != 0) {
     strlcpy(last_echo, value, sizeof(last_echo));
-    ESP_LOGI(kTag, "Latest echo: %s", last_echo);
-    display_show("HELLO CHANNELS", last_echo);
+    strlcpy(last_source, channel, sizeof(last_source));
+    ESP_LOGI(kTag, "Latest echo from %s: %s", last_source, last_echo);
+    display_show_message(last_echo, last_source);
   }
   cJSON_Delete(root);
 }
@@ -214,7 +221,7 @@ void show_current_state() {
              !(xEventGroupGetBits(wifi_events) & kWifiConnected)) {
     display_show("WI-FI STATUS", wifi_status);
   } else if (last_echo[0] != '\0') {
-    display_show("HELLO CHANNELS", last_echo);
+    display_show_message(last_echo, last_source);
   } else {
     display_show("WI-FI STATUS", "CONNECTED - FETCHING MESSAGE");
   }
