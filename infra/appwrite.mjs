@@ -153,15 +153,24 @@ export function ensureResourceVariable(group, resourceFlag, resourceId, key, val
     throw new Error(`Command failed: ${display(createArgs)}`);
   }
 
-  const projectResult = run(
-    ["project", "list-variables", "--where", `key=${key}`, "--limit", "100", "--json"],
-    { capture: true },
+  const directResult = run(
+    ["project", "get-variable", "--variable-id", key, "--json"],
+    { capture: true, allowFailure: true },
   );
-  const projectVariables = JSON.parse(projectResult.stdout).variables || [];
-  const conflict = projectVariables.find(
-    (variable) => variable.key === key &&
-      (variable.resourceType === "project" || !variable.resourceId),
-  );
+  let conflict = directResult.status === 0
+    ? JSON.parse(directResult.stdout)
+    : null;
+  if (!conflict) {
+    const projectResult = run(
+      ["project", "list-variables", "--where", `key=${key}`, "--limit", "100", "--json"],
+      { capture: true },
+    );
+    const parsed = JSON.parse(projectResult.stdout);
+    const projectVariables = Array.isArray(parsed) ? parsed : parsed.variables || [];
+    conflict = projectVariables.find(
+      (variable) => variable.$id === key || variable.id === key || variable.key === key,
+    );
+  }
   if (!conflict) {
     process.stderr.write(created.stderr || created.stdout || "");
     throw new Error(
@@ -174,7 +183,8 @@ export function ensureResourceVariable(group, resourceFlag, resourceId, key, val
     );
   }
 
-  run(["project", "delete-variable", "--variable-id", conflict.$id]);
+  const conflictId = conflict.$id || conflict.id || key;
+  run(["project", "delete-variable", "--variable-id", conflictId]);
   console.log(`Migrated project-global variable ${key} to ${group} scope`);
   run(createArgs);
   console.log(`Created ${group} variable ${key}`);

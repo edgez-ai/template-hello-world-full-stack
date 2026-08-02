@@ -32,10 +32,12 @@ export function installFunction() {
   }
 
   ensureResourceVariable(
-    "functions", "--function-id", functionId, "DATABASE_ID", config.databaseId,
+    "functions", "--function-id", functionId,
+    "HELLO_CHANNELS_DATABASE_ID", config.databaseId,
   );
   ensureResourceVariable(
-    "functions", "--function-id", functionId, "TABLE_ID", config.tableId,
+    "functions", "--function-id", functionId,
+    "HELLO_CHANNELS_TABLE_ID", config.tableId,
   );
 
   run([

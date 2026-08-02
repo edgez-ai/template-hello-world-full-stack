@@ -89,18 +89,18 @@ npm run deploy
 ```
 
 The deploy entrypoint loads the root `.env.local`, combines it with injected
-workspace variables, and configures the local CLI. It sets `DATABASE_ID` and
-`TABLE_ID` directly on the Function and the four public build values directly
-on the Site before creating deployments. Do not duplicate these as Appwrite
-project-global variables: Appwrite warns about the naming conflict and resource
-builds do not inherit project globals. The installer then idempotently creates
+workspace variables, and configures the local CLI. It maps those inputs to
+`HELLO_CHANNELS_*` resource variables on the Function and Site before creating
+deployments. The namespaced resource keys avoid collisions with Appwrite
+project-global variables while keeping the public environment contract unchanged.
+The installer then idempotently creates
 or updates the database, messages table, public Function, React web Site,
 deployments, and both conventional proxy rules. DNS must point both domains at
 the targets Appwrite reports.
 
 For repositories previously deployed with non-secret project-global variables,
-the installer migrates only conflicting keys to their intended Function or Site
-scope. It must refuse to delete a conflicting secret global automatically.
+the installer can migrate a visible conflicting key to resource scope. It must
+refuse to delete a conflicting secret global automatically.
 
 The installer changes remote state. Do not run it merely to test local code;
 run `npm run check` for local validation. Only run remote installation when the

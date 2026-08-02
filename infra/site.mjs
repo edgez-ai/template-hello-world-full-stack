@@ -34,10 +34,10 @@ export function installSite() {
   }
 
   const variables = [
-    ["APP_NAME", config.name],
-    ["APPWRITE_PROJECT_NAME", config.projectName],
-    ["DOMAIN_SUFFIX", config.domainSuffix],
-    ["POLL_INTERVAL_MS", config.pollIntervalMs],
+    ["HELLO_CHANNELS_APP_NAME", config.name],
+    ["HELLO_CHANNELS_PROJECT_NAME", config.projectName],
+    ["HELLO_CHANNELS_DOMAIN_SUFFIX", config.domainSuffix],
+    ["HELLO_CHANNELS_POLL_INTERVAL_MS", config.pollIntervalMs],
   ];
   for (const [key, value] of variables) {
     ensureResourceVariable("sites", "--site-id", siteId, key, value);

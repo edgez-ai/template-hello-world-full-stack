@@ -11,12 +11,10 @@ npm run deploy
 The deploy command automatically loads `../.env.local` for `DATABASE_ID`,
 `TABLE_ID`, and `POLL_INTERVAL_MS`. Existing process variables take precedence,
 so the Jupyter pod's `APP_NAME`, `DOMAIN_SUFFIX`, and Appwrite connection values
-remain authoritative. It publishes all five application values as Appwrite
-resource variables before deploying the Function and Site. The installer
-writes `DATABASE_ID` and `TABLE_ID` to the Function and writes
-`APP_NAME`, `APPWRITE_PROJECT_NAME`, `DOMAIN_SUFFIX`, and `POLL_INTERVAL_MS` to
-the Site before creating their deployments. It intentionally does not create
-same-named Appwrite project-global variables because that causes conflicts.
+remain authoritative. It maps these inputs to namespaced `HELLO_CHANNELS_*`
+Appwrite resource variables before deploying the Function and Site. This keeps
+the root environment contract unchanged while avoiding collisions with
+same-named Appwrite project-global variables.
 If an older deployment still has a conflicting non-secret global, the installer
 migrates that key to the intended Function or Site scope. Secret globals must be
 removed manually to avoid deleting an unknown secret automatically.
