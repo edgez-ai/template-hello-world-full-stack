@@ -22,13 +22,14 @@ and a 24 KiB NVS partition; the latter stores the provisioned Wi-Fi settings.
 ## Provision Wi-Fi
 
 When no credentials exist in NVS, the OLED and serial log show a BLE device
-name such as `HC_A1B2C3` and a proof-of-possession such as `hc-a1b2c3`. Use an
+name such as `PROV_A1B2C3`. The final six characters come from the board's MAC
+address, so nearby boards remain distinguishable. Use an
 Espressif-compatible provisioning client with:
 
 - Transport: BLE
 - Security: Security 1
-- Device name: the `HC_...` value shown by the board
-- Proof of possession: the `hc-...` value shown by the board
+- Device name: the `PROV_...` value shown by the board
+- Proof of possession (PIN): `123456`
 
 After provisioning succeeds, ESP-IDF stores the credentials in NVS, releases
 the Bluetooth memory, connects in station mode, and begins HTTPS polling.

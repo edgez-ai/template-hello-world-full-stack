@@ -65,10 +65,9 @@ const char *disconnect_status(uint8_t reason) {
 void make_provisioning_identity() {
   uint8_t mac[6];
   ESP_ERROR_CHECK(esp_read_mac(mac, ESP_MAC_WIFI_STA));
-  snprintf(provisioning_name, sizeof(provisioning_name), "HC_%02X%02X%02X",
+  snprintf(provisioning_name, sizeof(provisioning_name), "PROV_%02X%02X%02X",
            mac[3], mac[4], mac[5]);
-  snprintf(provisioning_pop, sizeof(provisioning_pop), "hc-%02x%02x%02x",
-           mac[3], mac[4], mac[5]);
+  strlcpy(provisioning_pop, "123456", sizeof(provisioning_pop));
 }
 
 void wifi_start_station() {
