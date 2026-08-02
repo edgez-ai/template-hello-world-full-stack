@@ -17,6 +17,9 @@ writes `DATABASE_ID` and `TABLE_ID` to the Function and writes
 `APP_NAME`, `APPWRITE_PROJECT_NAME`, `DOMAIN_SUFFIX`, and `POLL_INTERVAL_MS` to
 the Site before creating their deployments. It intentionally does not create
 same-named Appwrite project-global variables because that causes conflicts.
+If an older deployment still has a conflicting non-secret global, the installer
+migrates that key to the intended Function or Site scope. Secret globals must be
+removed manually to avoid deleting an unknown secret automatically.
 
 The installer uses the locally installed Appwrite CLI and is rerunnable. It
 delegates resources to separate modules:

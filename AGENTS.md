@@ -98,6 +98,10 @@ or updates the database, messages table, public Function, React web Site,
 deployments, and both conventional proxy rules. DNS must point both domains at
 the targets Appwrite reports.
 
+For repositories previously deployed with non-secret project-global variables,
+the installer migrates only conflicting keys to their intended Function or Site
+scope. It must refuse to delete a conflicting secret global automatically.
+
 The installer changes remote state. Do not run it merely to test local code;
 run `npm run check` for local validation. Only run remote installation when the
 user asks to provision or update Appwrite.

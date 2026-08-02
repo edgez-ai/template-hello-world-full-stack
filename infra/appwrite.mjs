@@ -133,13 +133,50 @@ export function ensureResourceVariable(group, resourceFlag, resourceId, key, val
     console.log(`Updated ${group} variable ${key}`);
     return;
   }
-  run([
+
+  const createArgs = [
     group, "create-variable",
     resourceFlag, resourceId,
     "--key", key,
     "--value", value,
     "--secret", "false",
-  ]);
+  ];
+  const created = run(createArgs, { capture: true, allowFailure: true });
+  if (created.status === 0) {
+    console.log(`Created ${group} variable ${key}`);
+    return;
+  }
+
+  const createError = `${created.stderr || ""}\n${created.stdout || ""}`;
+  if (!/variable with the same id already exists/i.test(createError)) {
+    process.stderr.write(created.stderr || created.stdout || "");
+    throw new Error(`Command failed: ${display(createArgs)}`);
+  }
+
+  const projectResult = run(
+    ["project", "list-variables", "--where", `key=${key}`, "--limit", "100", "--json"],
+    { capture: true },
+  );
+  const projectVariables = JSON.parse(projectResult.stdout).variables || [];
+  const conflict = projectVariables.find(
+    (variable) => variable.key === key &&
+      (variable.resourceType === "project" || !variable.resourceId),
+  );
+  if (!conflict) {
+    process.stderr.write(created.stderr || created.stdout || "");
+    throw new Error(
+      `Could not identify the project-global variable conflicting with ${key}`,
+    );
+  }
+  if (conflict.secret) {
+    throw new Error(
+      `Refusing to delete secret project-global variable ${key}; remove it manually before deploying`,
+    );
+  }
+
+  run(["project", "delete-variable", "--variable-id", conflict.$id]);
+  console.log(`Migrated project-global variable ${key} to ${group} scope`);
+  run(createArgs);
   console.log(`Created ${group} variable ${key}`);
 }
 
