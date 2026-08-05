@@ -10,3 +10,4 @@ infra/appwrite.config.json
 app/android/build.gradle
 firmware/.vscode/extensions.json
 .gitignore
+!site/.gitignore
