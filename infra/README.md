@@ -30,6 +30,10 @@ delegates resources to separate modules:
 - `appwrite.mjs` contains only shared CLI/configuration helpers.
 - `install-appwrite.mjs` is the small orchestrator.
 
+The Appwrite CLI honors the deployment directory's `.gitignore`; both `site/`
+and `function/` exclude local `node_modules/` so the remote builders install
+dependencies instead of receiving the local dependency trees.
+
 The API key is used only by the local CLI and must never be added to a frontend.
 Run `INFRA_DRY_RUN=1 npm run deploy` to inspect commands without
 changing Appwrite.
